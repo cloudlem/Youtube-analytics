@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --youtube-red: #ff0000;
+            --youtube-dark: #0f0f0f;
+            --youtube-light: #ffffff;
+            --youtube-gray: #272727;
+            --youtube-light-gray: #3f3f3f;
+            --youtube-text: #f1f1f1;
+            --youtube-text-secondary: #aaa;
+            --accent: #3ea6ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--youtube-dark);
+            color: var(--youtube-text);
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--youtube-dark);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--youtube-light-gray);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--youtube-light);
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            color: var(--youtube-red);
+        }
+
+        .nav-links a {
+            color: var(--youtube-text);
+            text-decoration: none;
+            margin-left: 2rem;
+            transition: color 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .banner {
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .banner h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .banner p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .search-container {
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            gap: 1rem;
+            background: var(--youtube-gray);
+            padding: 1.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--youtube-light-gray);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 1.2rem 2rem;
+            border: none;
+            background: transparent;
+            color: var(--youtube-text);
+            font-size: 1.2rem;
+            outline: none;
+            font-weight: 500;
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--youtube-text-secondary);
+            font-weight: 400;
+        }
+
+        button {
+            padding: 1.2rem 3rem;
+            border: none;
+            border-radius: 40px;
+            background: var(--youtube-red);
+            color: var(--youtube-light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        button:hover {
+            background: #cc0000;
+            transform: scale(1.05);
+        }
+
+        button i {
+            font-size: 1.2rem;
+        }
+
+        .analytics-container {
+            max-width: 1400px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .analytics-grid {
+            gap: 3rem;
+            margin-bottom: 6rem;
+        }
+
+        .analytics-block {
+            padding: 2rem;
+        }
+
+        .analytics-block h3 {
+            font-size: 1rem;
+        }
+
+        .analytics-block p {
+            font-size: 2rem;
+        }
+
+        .charts-grid {
+            gap: 3rem;
+            margin-bottom: 6rem;
+        }
+
+        .chart-container {
+            height: 500px;
+        }
+
+        .info-section {
+            background: var(--youtube-gray);
+            padding: 4rem 2rem;
+            margin: 2rem 0;
+            border-top: 1px solid var(--youtube-light-gray);
+            border-bottom: 1px solid var(--youtube-light-gray);
+        }
+
+        .info-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .info-card {
+            background: var(--youtube-dark);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid var(--youtube-light-gray);
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .info-card i {
+            font-size: 2.5rem;
+            color: var(--youtube-red);
+            margin-bottom: 1rem;
+        }
+
+        .info-card h3 {
+            color: var(--youtube-text);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .info-card p {
+            color: var(--youtube-text-secondary);
+            line-height: 1.8;
+        }
+
+        footer {
+            background: var(--youtube-gray);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 4rem;
+            border-top: 1px solid var(--youtube-light-gray);
+        }
+
+        footer a {
+            color: var(--youtube-text-secondary);
+            text-decoration: none;
+            margin: 0 1rem;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--youtube-text);
+        }
+
+        .error-message {
+            background: var(--youtube-red);
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            display: none;
+            color: var(--youtube-light);
+        }
+
+        @media (max-width: 768px) {
+            .banner h1 {
+                font-size: 2.5rem;
+            }
+
+            .banner p {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-container {
+                flex-direction: column;
+                border-radius: 25px;
+                padding: 1rem;
+            }
+
+            input[type="text"] {
+                padding: 1rem;
+                font-size: 1.1rem;
+            }
+
+            button {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="#" class="logo">
+            <i class="fab fa-youtube"></i>
+            YouTube Analytics
+        </a>
+        <nav class="nav-links">
+            <a href="#"><i class="fab fa-tiktok"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="banner">
+            <h1>YouTube Channel Analytics</h1>
+            <p>Get detailed insights and statistics for any YouTube channel. Analyze growth, engagement, and revenue potential with our comprehensive analytics tool.</p>
+            <div class="search-container">
+                <input type="text" id="channelInput" placeholder="Enter YouTube channel URL or name">
+                <button onclick="searchChannel()">
+                    <i class="fas fa-search"></i> Search Channel
+                </button>
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+        </section>
+
+        <section class="info-section">
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Comprehensive Analytics</h3>
+                    <p>Get detailed insights into channel performance, including subscriber growth, view counts, and engagement metrics. Track your channel's progress over time.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-dollar-sign"></i>
+                    <h3>Revenue Analysis</h3>
+                    <p>Calculate estimated revenue based on views and country-specific RPM rates. Understand your channel's earning potential across different regions.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Audience Insights</h3>
+                    <p>Analyze your audience demographics and engagement patterns. Make data-driven decisions to grow your channel and increase viewer retention.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="analytics-container" id="analyticsContainer">
+            <div class="analytics-grid" id="analyticsGrid"></div>
+            <div class="charts-grid" id="chartsGrid"></div>
+        </section>
+    </main>
+
+    <footer>
+        <a href="#">Terms of Service</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Contact</a>
+    </footer>
+
+    <script>
+        const API_KEY = 'AIzaSyDwaXqRcHmKCGYq7QbwHnaRrVhRScUY31U';
+        const RPM_RATES = {
+            'US': 7.53,
+            'GB': 5.62,
+            'NZ': 5.56,
+            'AE': 2.33,
+            'PK': 2.5,
+            'IN': 2.5,
+            'DEFAULT': 2.5
+        };
+
+        let charts = {};
+
+        async function searchChannel() {
+            const input = document.getElementById('channelInput').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const analyticsContainer = document.getElementById('analyticsContainer');
+
+            if (!input) {
+                showError('Please enter a channel URL or name');
+                return;
+            }
+
+            try {
+                // Search for the channel
+                const searchResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(input)}&type=channel&key=${API_KEY}`);
+                const searchData = await searchResponse.json();
+
+                if (!searchData.items || searchData.items.length === 0) {
+                    showError('No channel found');
+                    return;
+                }
+
+                const channelId = searchData.items[0].id.channelId;
+
+                // Get channel details
+                const channelResponse = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,status,brandingSettings&id=${channelId}&key=${API_KEY}`);
+                const channelData = await channelResponse.json();
+
+                if (!channelData.items || channelData.items.length === 0) {
+                    showError('Could not fetch channel details');
+                    return;
+                }
+
+                displayAnalytics(channelData.items[0]);
+                createCharts();
+                
+                errorMessage.style.display = 'none';
+                analyticsContainer.style.display = 'block';
+            } catch (error) {
+                showError('An error occurred while fetching data');
+                console.error(error);
+            }
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            document.getElementById('analyticsContainer').style.display = 'none';
+        }
+
+        function displayAnalytics(channel) {
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            const snippet = channel.snippet;
+            const statistics = channel.statistics;
+
+            // Calculate estimated revenue
+            const views = parseInt(statistics.viewCount);
+            const estimatedRevenue = calculateRevenue(views, snippet.country || 'DEFAULT');
+
+            const analyticsData = [
+                { title: 'Channel Title', value: snippet.title },
+                { title: 'Subscribers', value: statistics.subscriberCount || 'Hidden' },
+                { title: 'Total Views', value: statistics.viewCount },
+                { title: 'Video Count', value: statistics.videoCount },
+                { title: 'Channel Created', value: new Date(snippet.publishedAt).toLocaleDateString() },
+                { title: 'Country', value: snippet.country || 'Not specified' },
+                { title: 'Estimated Revenue', value: `$${estimatedRevenue.toLocaleString()}`, isRevenue: true }
+            ];
+
+            analyticsGrid.innerHTML = analyticsData.map(item => `
+                <div class="analytics-block ${item.isRevenue ? 'revenue-block' : ''}">
+                    <h3>${item.title}</h3>
+                    <p>${item.value}</p>
+                </div>
+            `).join('');
+        }
+
+        function calculateRevenue(views, country) {
+            const rpm = RPM_RATES[country] || RPM_RATES.DEFAULT;
+            return Math.round((views / 1000) * rpm);
+        }
+
+        function createCharts() {
+            const chartsGrid = document.getElementById('chartsGrid');
+            chartsGrid.innerHTML = '';
+
+            const chartConfigs = [
+                {
+                    type: 'line',
+                    title: 'Subscriber Growth',
+                    data: generateRandomData(12)
+                },
+                {
+                    type: 'bar',
+                    title: 'Video Uploads',
+                    data: generateRandomData(6)
+                },
+                {
+                    type: 'pie',
+                    title: 'Views Distribution',
+                    data: generateRandomData(4)
+                },
+                {
+                    type: 'doughnut',
+                    title: 'Revenue Trends',
+                    data: generateRandomData(4)
+                },
+                {
+                    type: 'radar',
+                    title: 'Engagement Metrics',
+                    data: generateRandomData(5)
+                },
+                {
+                    type: 'polarArea',
+                    title: 'Audience Demographics',
+                    data: generateRandomData(5)
+                }
+            ];
+
+            chartConfigs.forEach((config, index) => {
+                const container = document.createElement('div');
+                container.className = 'chart-container';
+                const canvas = document.createElement('canvas');
+                container.appendChild(canvas);
+                chartsGrid.appendChild(container);
+
+                const ctx = canvas.getContext('2d');
+                charts[`chart${index}`] = new Chart(ctx, {
+                    type: config.type,
+                    data: {
+                        labels: Array.from({ length: config.data.length }, (_, i) => `Data ${i + 1}`),
+                        datasets: [{
+                            label: config.title,
+                            data: config.data,
+                            backgroundColor: generateColors(config.data.length),
+                            borderColor: config.type === 'line' ? '#00ffcc' : generateColors(config.data.length),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#ffffff'
+                                }
+                            }
+                        },
+                        scales: config.type === 'line' || config.type === 'bar' ? {
+                            y: {
+                                ticks: { color: '#ffffff' }
+                            },
+                            x: {
+                                ticks: { color: '#ffffff' }
+                            }
+                        } : undefined
+                    }
+                });
+            });
+        }
+
+        function generateRandomData(count) {
+            return Array.from({ length: count }, () => Math.floor(Math.random() * 1000));
+        }
+
+        function generateColors(count) {
+            const colors = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF9F40'
+            ];
+            return colors.slice(0, count);
+        }
+    </script>
+</body>
+</html>
